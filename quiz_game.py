@@ -152,40 +152,40 @@ class QuizGame:
         print("=" * 40)
 
     def get_menu_choice(self):
-        """메뉴 번호(1~6)를 입력받아 반환한다. 형식이 잘못됐으면 None을 반환한다."""
-        raw = input("선택: ")
-        value = raw.strip()
+        """1~6 범위의 정수를 입력받는다. 잘못된 입력이면 None을 반환한다."""
+        value = input("선택: ").strip()
 
         if value == "":
             print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
             return None
 
-        if not value.isdigit():
+        try:
+            choice = int(value)
+        except ValueError:
             print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
             return None
 
-        choice = int(value)
-        if choice < 1 or choice > 6:
+        if not 1 <= choice <= 6:
             print("⚠️ 잘못된 입력입니다. 1-6 사이의 숫자를 입력하세요.")
             return None
 
         return choice
 
     def get_answer_choice(self):
-        """정답 번호(1~4)를 입력받아 반환한다. 형식이 잘못됐으면 None을 반환한다."""
-        raw = input("정답 입력: ")
-        value = raw.strip()
+        """1~4 범위의 정수를 입력받는다. 잘못된 입력이면 None을 반환한다."""
+        value = input("정답 입력: ").strip()
 
         if value == "":
             print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
             return None
 
-        if not value.isdigit():
+        try:
+            choice = int(value)
+        except ValueError:
             print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
             return None
 
-        choice = int(value)
-        if choice < 1 or choice > 4:
+        if not 1 <= choice <= 4:
             print("⚠️ 잘못된 입력입니다. 1-4 사이의 숫자를 입력하세요.")
             return None
 
@@ -211,11 +211,11 @@ class QuizGame:
             if value == "":
                 return total
 
-            if not value.isdigit():
+            try:
+                count = int(value)
+            except ValueError:
                 print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
                 continue
-
-            count = int(value)
             if count < 1 or count > total:
                 print(f"⚠️ 잘못된 입력입니다. 1-{total} 사이의 숫자를 입력하세요.")
                 continue
@@ -234,11 +234,11 @@ class QuizGame:
             print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
             return None
 
-        if not value.isdigit():
+        try:
+            choice = int(value)
+        except ValueError:
             print("⚠️ 잘못된 입력입니다. 숫자 또는 h를 입력하세요.")
             return None
-
-        choice = int(value)
         if choice < 1 or choice > 4:
             print("⚠️ 잘못된 입력입니다. 1-4 사이의 숫자를 입력하세요.")
             return None
@@ -340,21 +340,26 @@ class QuizGame:
             return
 
         self.list_quizzes()
-        raw = input("삭제할 퀴즈 번호를 입력하세요: ")
-        value = raw.strip()
 
-        if value == "":
-            print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
-            return
+        index = None
+        while index is None:
+            raw = input("삭제할 퀴즈 번호를 입력하세요: ")
+            value = raw.strip()
 
-        if not value.isdigit():
-            print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
-            return
+            if value == "":
+                print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
+                continue
 
-        index = int(value)
-        if index < 1 or index > len(self.quizzes):
-            print(f"⚠️ 잘못된 입력입니다. 1-{len(self.quizzes)} 사이의 숫자를 입력하세요.")
-            return
+            try:
+                candidate = int(value)
+            except ValueError:
+                print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
+                continue
+            if candidate < 1 or candidate > len(self.quizzes):
+                print(f"⚠️ 잘못된 입력입니다. 1-{len(self.quizzes)} 사이의 숫자를 입력하세요.")
+                continue
+
+            index = candidate
 
         removed = self.quizzes.pop(index - 1)
         self.save_state()
