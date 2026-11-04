@@ -19,7 +19,8 @@ class QuizGame:
 
     def load_state(self):
         """state.json에서 퀴즈 데이터, 최고 점수, 게임 기록을 불러온다.
-        파일이 없거나 손상된 경우 기본 퀴즈 데이터를 사용한다."""
+        파일이 없거나, JSON 문법이 깨졌거나, 구조/자료형이 올바르지 않으면
+        기본 퀴즈 데이터·초기 점수·빈 기록으로 복구한다."""
         if not STATE_FILE.exists():
             self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
@@ -29,16 +30,101 @@ class QuizGame:
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            self.quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
-            self.best_score = data.get("best_score")
-            self.history = data.get("history", [])
-            score_text = self.best_score if self.best_score is not None else "없음"
-            print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})")
-        except (json.JSONDecodeError, KeyError, OSError):
-            print("⚠️ 저장된 데이터 파일이 손상되었습니다. 기본 퀴즈 데이터로 복구합니다.")
+            quizzes, best_score, history = self._parse_state(data)
+        except (json.JSONDecodeError, OSError, ValueError) as error:
+            print(f"⚠️ 저장된 데이터 파일이 손상되었습니다 ({error}). 기본 퀴즈 데이터로 복구합니다.")
             self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
             self.history = []
+            return
+
+        # 검증이 모두 끝난 뒤에만 실제 상태에 반영한다 (일부만 불러온 상태 방지).
+        self.quizzes = quizzes
+        self.best_score = best_score
+        self.history = history
+        score_text = self.best_score if self.best_score is not None else "없음"
+        print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})")
+
+    @staticmethod
+    def _parse_state(data):
+        """불러온 JSON 데이터의 구조와 값을 검증해 (quizzes, best_score, history)를 반환한다.
+        구조나 값이 올바르지 않으면 ValueError를 발생시킨다."""
+        if not isinstance(data, dict):
+            raise ValueError("최상위 데이터가 객체(dict)가 아닙니다")
+
+        raw_quizzes = data.get("quizzes")
+        if not isinstance(raw_quizzes, list):
+            raise ValueError("'quizzes'가 리스트가 아닙니다")
+
+        quizzes = [QuizGame._parse_quiz_item(item) for item in raw_quizzes]
+
+        best_score = data.get("best_score")
+        if best_score is not None and (
+            not isinstance(best_score, int)
+            or isinstance(best_score, bool)
+            or not (0 <= best_score <= 100)
+        ):
+            raise ValueError("'best_score'가 올바른 값이 아닙니다")
+
+        raw_history = data.get("history", [])
+        if not isinstance(raw_history, list):
+            raise ValueError("'history'가 리스트가 아닙니다")
+
+        history = [QuizGame._parse_history_entry(entry) for entry in raw_history]
+
+        return quizzes, best_score, history
+
+    @staticmethod
+    def _parse_quiz_item(item):
+        """퀴즈 1개의 딕셔너리를 검증하고 Quiz 객체로 변환한다."""
+        if not isinstance(item, dict):
+            raise ValueError("퀴즈 항목이 객체(dict)가 아닙니다")
+
+        question = item.get("question")
+        if not isinstance(question, str) or not question.strip():
+            raise ValueError("퀴즈의 'question'이 올바르지 않습니다")
+
+        choices = item.get("choices")
+        if (
+            not isinstance(choices, list)
+            or len(choices) != 4
+            or not all(isinstance(c, str) and c.strip() for c in choices)
+        ):
+            raise ValueError("퀴즈의 'choices'는 문자열 4개여야 합니다")
+
+        answer = item.get("answer")
+        if not isinstance(answer, int) or isinstance(answer, bool) or not (1 <= answer <= 4):
+            raise ValueError("퀴즈의 'answer'는 1~4 사이의 정수여야 합니다")
+
+        hint = item.get("hint")
+        if hint is not None and not isinstance(hint, str):
+            raise ValueError("퀴즈의 'hint'는 문자열이거나 없어야 합니다")
+
+        return Quiz(question, choices, answer, hint)
+
+    @staticmethod
+    def _parse_history_entry(entry):
+        """게임 기록 1개의 딕셔너리를 검증하고 그대로 반환한다."""
+        if not isinstance(entry, dict):
+            raise ValueError("게임 기록 항목이 객체(dict)가 아닙니다")
+
+        datetime_value = entry.get("datetime")
+        if not isinstance(datetime_value, str) or not datetime_value.strip():
+            raise ValueError("게임 기록의 'datetime'이 올바르지 않습니다")
+
+        question_count = entry.get("question_count")
+        if (
+            not isinstance(question_count, int)
+            or isinstance(question_count, bool)
+            or question_count < 1
+        ):
+            raise ValueError("게임 기록의 'question_count'가 올바르지 않습니다")
+
+        score = entry.get("score")
+        if not isinstance(score, int) or isinstance(score, bool) or not (0 <= score <= 100):
+            raise ValueError("게임 기록의 'score'가 올바르지 않습니다")
+
+        return {"datetime": datetime_value, "question_count": question_count, "score": score}
 
     def save_state(self):
         """현재 퀴즈 데이터, 최고 점수, 게임 기록을 state.json에 저장한다."""
