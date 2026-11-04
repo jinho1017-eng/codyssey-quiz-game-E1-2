@@ -121,30 +121,7 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 git reflog --date=iso | Select-String "clone:"
 ```
 
-출력에서 `2026-11-04 18:44:14 +0900`에 해당 GitHub 저장### 최초 clone 기록 확인
-
-
-
-복제 폴더에서 다음 명령으로 최초 clone 기록을 확인했다.
-
-
-
-```powershell
-
-git reflog --date=iso | Select-String "clone:"
-
-```
-
-
-
-출력에서 `2026-11-04 18:44:14 +0900`에 해당 GitHub 저장소를
-
-clone한 기록을 확인했다.
-
-
-
-![최초 clone 기록 확인](docs/screenshots/clone_history.png)소를
-clone한 기록을 확인했다.
+출력에서 `2026-11-04 18:44:14 +0900`에 해당 GitHub 저장소를 clone한 기록을 확인했다.
 
 ![최초 clone 기록 확인](docs/screenshots/clone_history.png)
 
