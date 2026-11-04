@@ -111,7 +111,42 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 4. 원래 폴더 `D:\codyssey\quiz-game-E1-2`에서 `git pull --ff-only origin main`을 실행했다.
 5. README의 추가 문구와 `git log -1 --oneline`을 확인해 동일한 커밋 `452aad3`이 반영된 것을 검증했다.
 
-최초 clone 명령의 출력은 아래 증거에 포함되지 않는다. 실습용 문구는 검증 후 커밋 `4fc87f1`에서 삭제했으며, 실습 당시 기록은 커밋 이력과 아래 캡처에 남아 있다.
+최초 clone 실행 화면 대신, 복제 폴더의 Git reflog에 남아 있는 기록으로 최초 복제 사실을 확인했다. 실습용 문구는 검증 후 커밋 `4fc87f1`에서 삭제했으며, 실습 당시 기록은 커밋 이력과 아래 캡처에 남아 있다.
+
+### 최초 clone 기록 확인
+
+복제 폴더에서 다음 명령으로 최초 clone 기록을 확인했다.
+
+```powershell
+git reflog --date=iso | Select-String "clone:"
+```
+
+출력에서 `2026-11-04 18:44:14 +0900`에 해당 GitHub 저장### 최초 clone 기록 확인
+
+
+
+복제 폴더에서 다음 명령으로 최초 clone 기록을 확인했다.
+
+
+
+```powershell
+
+git reflog --date=iso | Select-String "clone:"
+
+```
+
+
+
+출력에서 `2026-11-04 18:44:14 +0900`에 해당 GitHub 저장소를
+
+clone한 기록을 확인했다.
+
+
+
+![최초 clone 기록 확인](docs/screenshots/clone_history.png)소를
+clone한 기록을 확인했다.
+
+![최초 clone 기록 확인](docs/screenshots/clone_history.png)
 
 ### 복제 폴더의 commit·push
 
@@ -150,4 +185,3 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 ### 퀴즈 삭제
 
 ![퀴즈 삭제](docs/screenshots/delete_quiz.png)
-
