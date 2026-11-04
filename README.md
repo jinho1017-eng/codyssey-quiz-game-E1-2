@@ -99,17 +99,27 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 - 같은 문제에서 힌트를 여러 번 요청해도, 그 문제에 대한 감점은 1회만 적용된다.
 - 힌트는 **해당 문제에 힌트가 등록되어 있을 때만** `h`로 사용할 수 있다. (사용자가 추가한 퀴즈는 힌트를 입력하지 않았다면 `h`가 동작하지 않는다.)
 
-## 7. Git 실습 증거 (clone → 수정·커밋·push → pull)
+## 7. Git 복제 폴더와 원래 폴더의 변경 반영 실습
 
-과제에서 요구한 clone/pull 실습을 다음 순서로 수행했다.
+이번 실습에서는 기존에 clone해둔 별도 폴더를 사용했다.
 
-1. 별도 폴더에 저장소를 clone했다.
-2. 그 clone 폴더의 `README.md`에 실습용 문구를 추가하고 `commit` → `push`했다.
-3. 원래 작업 폴더로 돌아와 `pull`로 변경사항을 받아왔다.
+1. 복제 폴더 `D:\codyssey\quiz-game-E1-2-clone-test`를 `git pull --ff-only origin main`으로 최신 상태로 갱신했다.
+2. 복제 폴더의 README에 실습용 문구를 추가했다.
+3. 변경을 커밋하고 GitHub에 push했다.
+   - 커밋: `452aad3`
+   - 메시지: `Docs: 복제 폴더에서 Git 실습 기록 추가`
+4. 원래 폴더 `D:\codyssey\quiz-game-E1-2`에서 `git pull --ff-only origin main`을 실행했다.
+5. README의 추가 문구와 `git log -1 --oneline`을 확인해 동일한 커밋 `452aad3`이 반영된 것을 검증했다.
 
-이 중 3단계까지 실제로 반영되었다는 점은 커밋 이력으로 확인할 수 있다 — `Docs: clone/pull 실습용 문구 추가` 커밋(해시 `4273624`)이 그 결과이며, `git show 4273624`로 그 시점에 `README.md`에 해당 문구가 추가된 diff를 직접 확인할 수 있다. 다만 이후 "실행 화면" 섹션을 추가하는 과정에서 그 문구 자체는 덮어써져 지금 README 본문에는 남아있지 않다(이 사실도 `git log`로 확인 가능).
+최초 clone 명령의 출력은 아래 증거에 포함되지 않는다. 실습용 문구는 검증 후 커밋 `4fc87f1`에서 삭제했으며, 실습 당시 기록은 커밋 이력과 아래 캡처에 남아 있다.
 
-> ⚠️ **확인 필요**: clone/pull 과정을 캡처한 스크린샷은 작업 중에 생성했으나 `docs/screenshots/`에 별도 파일로 저장해두지 않았다. 이 README만으로는 그 스크린샷을 제시할 수 없으므로, 제출 시 clone/pull 과정을 캡처한 이미지가 추가로 필요하다면 별도로 재현하거나 보관해둔 캡처를 `docs/screenshots/clone_pull.png` 등으로 추가하는 것을 권장한다.
+### 복제 폴더의 commit·push
+
+![복제 폴더 commit 및 push](docs/screenshots/clone_push.png)
+
+### 원래 폴더의 pull·반영 확인
+
+![원래 폴더 pull 및 반영 확인](docs/screenshots/clone_pull.png)
 
 ## 8. 실행 화면
 
