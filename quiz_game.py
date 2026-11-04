@@ -1,5 +1,5 @@
 """QuizGame 클래스 - 게임 전체를 관리한다."""
-
+import random
 import json
 from pathlib import Path
 
@@ -116,8 +116,9 @@ class QuizGame:
 
         print(f"\n📝 퀴즈를 시작합니다! (총 {len(self.quizzes)}문제)")
 
+        quizzes_to_play = random.sample(self.quizzes, len(self.quizzes))
         correct_count = 0
-        for index, quiz in enumerate(self.quizzes, start=1):
+        for index, quiz in enumerate(quizzes_to_play, start=1):
             print("-" * 40)
             print(f"[문제 {index}]")
             quiz.show()
