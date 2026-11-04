@@ -1,6 +1,7 @@
 """QuizGame 클래스 - 게임 전체를 관리한다."""
 import random
 import json
+from datetime import datetime
 from pathlib import Path
 
 from quiz import Quiz
@@ -13,14 +14,16 @@ class QuizGame:
     def __init__(self):
         self.quizzes = []
         self.best_score = None
+        self.history = []
         self.load_state()
 
     def load_state(self):
-        """state.json에서 퀴즈 데이터와 최고 점수를 불러온다.
+        """state.json에서 퀴즈 데이터, 최고 점수, 게임 기록을 불러온다.
         파일이 없거나 손상된 경우 기본 퀴즈 데이터를 사용한다."""
         if not STATE_FILE.exists():
             self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
+            self.history = []
             return
 
         try:
@@ -28,18 +31,21 @@ class QuizGame:
                 data = json.load(f)
             self.quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
             self.best_score = data.get("best_score")
+            self.history = data.get("history", [])
             score_text = self.best_score if self.best_score is not None else "없음"
             print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})")
         except (json.JSONDecodeError, KeyError, OSError):
             print("⚠️ 저장된 데이터 파일이 손상되었습니다. 기본 퀴즈 데이터로 복구합니다.")
             self.quizzes = list(DEFAULT_QUIZZES)
             self.best_score = None
+            self.history = []
 
     def save_state(self):
-        """현재 퀴즈 데이터와 최고 점수를 state.json에 저장한다."""
+        """현재 퀴즈 데이터, 최고 점수, 게임 기록을 state.json에 저장한다."""
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
+            "history": self.history,
         }
         try:
             with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -154,10 +160,10 @@ class QuizGame:
         return choice
 
     def play_quiz(self):
-        """퀴즈를 랜덤 순서로 출제하고 점수를 계산해 반환한다."""
+        """퀴즈를 랜덤 순서로 출제하고 (점수, 문제 수)를 반환한다."""
         if not self.quizzes:
             print("\n등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해주세요.")
-            return None
+            return None, None
 
         count = self.get_question_count()
 
@@ -204,7 +210,7 @@ class QuizGame:
         if hint_used_count:
             print(f"   (힌트 {hint_used_count}회 사용으로 {hint_used_count * 5}점 감점됨)")
         print("=" * 40)
-        return score
+        return score, count
 
     def add_quiz(self):
         """새 퀴즈를 입력받아 목록에 추가하고 파일에 저장한다."""
@@ -269,12 +275,17 @@ class QuizGame:
         print(f"\n🗑️ 삭제되었습니다: {removed.question}")
 
     def check_score(self):
-        """최고 점수를 출력한다."""
+        """최고 점수와 최근 게임 기록을 출력한다."""
         if self.best_score is None:
             print("\n아직 퀴즈를 풀지 않으셨습니다. 먼저 퀴즈를 풀어보세요.")
             return
 
         print(f"\n🏆 최고 점수: {self.best_score}점")
+
+        if self.history:
+            print("\n📜 최근 게임 기록 (최대 5개):")
+            for entry in self.history[-5:]:
+                print(f"  {entry['datetime']} | {entry['question_count']}문제 | {entry['score']}점")
 
     def run(self):
         """게임의 메인 루프를 실행한다."""
@@ -290,11 +301,17 @@ class QuizGame:
                     continue
 
                 if choice == 1:
-                    score = self.play_quiz()
-                    if score is not None and (self.best_score is None or score > self.best_score):
-                        self.best_score = score
+                    score, count = self.play_quiz()
+                    if score is not None:
+                        self.history.append({
+                            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "question_count": count,
+                            "score": score,
+                        })
+                        if self.best_score is None or score > self.best_score:
+                            self.best_score = score
+                            print("🎉 새로운 최고 점수입니다!")
                         self.save_state()
-                        print("🎉 새로운 최고 점수입니다!")
                 elif choice == 2:
                     self.add_quiz()
                 elif choice == 3:
