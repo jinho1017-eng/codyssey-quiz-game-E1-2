@@ -108,15 +108,37 @@ class QuizGame:
                 continue
             return value
 
+    def get_question_count(self):
+        """풀 문제 수를 입력받는다. 빈 입력이면 전체 문제 수를 사용한다."""
+        total = len(self.quizzes)
+        while True:
+            raw = input(f"몇 문제를 푸시겠습니까? (1~{total}, 그냥 Enter는 전체 {total}문제): ")
+            value = raw.strip()
+
+            if value == "":
+                return total
+
+            if not value.isdigit():
+                print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
+                continue
+
+            count = int(value)
+            if count < 1 or count > total:
+                print(f"⚠️ 잘못된 입력입니다. 1-{total} 사이의 숫자를 입력하세요.")
+                continue
+
+            return count
+
     def play_quiz(self):
         """퀴즈 목록을 출제하고 점수를 계산해 반환한다."""
         if not self.quizzes:
             print("\n등록된 퀴즈가 없습니다. 먼저 퀴즈를 추가해주세요.")
             return None
+        count = self.get_question_count()
 
-        print(f"\n📝 퀴즈를 시작합니다! (총 {len(self.quizzes)}문제)")
+        print(f"\n📝 퀴즈를 시작합니다! (총 {count}문제)")
 
-        quizzes_to_play = random.sample(self.quizzes, len(self.quizzes))
+        quizzes_to_play = random.sample(self.quizzes, count)
         correct_count = 0
         for index, quiz in enumerate(quizzes_to_play, start=1):
             print("-" * 40)
