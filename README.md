@@ -1,4 +1,3 @@
-
 # Codyssey 파이썬 퀴즈 게임
 
 ## 1. 프로젝트 개요
@@ -36,6 +35,8 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 ├── quiz_game.py          # QuizGame 클래스 (게임 전체 관리)
 ├── default_quizzes.py    # 기본 Python 상식 퀴즈 데이터
 ├── state.json            # 저장된 퀴즈/점수 데이터 (실행 시 자동 생성, Git에는 포함하지 않음)
+├── docs/
+│   └── screenshots/       # 제출용 실행 화면 캡처
 ├── .gitignore
 └── README.md
 ```
@@ -64,5 +65,28 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 - **오류 처리**: 파일이 손상되어 JSON으로 읽을 수 없는 경우, 프로그램이 멈추지 않고 안내 메시지를 출력한 뒤 기본 퀴즈 데이터로 복구한다.
 
 
-## 7. 참고
-clone/pull 실습을 위해 이 줄을 추가했다.
+## 7. 실행 화면
+
+### 개발 환경
+
+![개발 환경](docs/screenshots/dev_environment.png)
+
+### 커밋 히스토리 (git log --oneline --graph)
+
+![git log](docs/screenshots/git_log.png)
+
+### 퀴즈 추가
+
+![퀴즈 추가](docs/screenshots/add_quiz.png)
+
+### 퀴즈 목록
+
+![퀴즈 목록](docs/screenshots/list.png)
+
+### 퀴즈 풀기
+
+![퀴즈 풀기](docs/screenshots/play.png)
+
+### 점수 확인
+
+![점수 확인](docs/screenshots/score.png)
