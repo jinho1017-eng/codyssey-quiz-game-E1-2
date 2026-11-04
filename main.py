@@ -1,5 +1,6 @@
 """Codyssey 파이썬 퀴즈 게임 - main.py"""
 
+from quiz import Quiz
 from default_quizzes import DEFAULT_QUIZZES
 
 
@@ -57,6 +58,17 @@ def get_answer_choice():
     return choice
 
 
+def get_nonempty_text(prompt):
+    """빈 값이 아닌 텍스트를 입력받는다."""
+    while True:
+        raw = input(prompt)
+        value = raw.strip()
+        if value == "":
+            print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
+            continue
+        return value
+
+
 def play_quiz(quizzes):
     """퀴즈 목록을 출제하고 점수를 계산해 반환한다."""
     if not quizzes:
@@ -88,8 +100,29 @@ def play_quiz(quizzes):
     return score
 
 
+def add_quiz(quizzes):
+    """새 퀴즈를 입력받아 목록에 추가한다."""
+    print("\n📌 새로운 퀴즈를 추가합니다.")
+
+    question = get_nonempty_text("문제를 입력하세요: ")
+
+    choices = []
+    for i in range(1, 5):
+        choice = get_nonempty_text(f"선택지 {i}: ")
+        choices.append(choice)
+
+    answer = None
+    while answer is None:
+        answer = get_answer_choice()
+
+    new_quiz = Quiz(question, choices, answer)
+    quizzes.append(new_quiz)
+    print("\n✅ 퀴즈가 추가되었습니다!")
+
+
 def main():
     print("프로그램을 시작합니다.")
+    quizzes = list(DEFAULT_QUIZZES)
 
     while True:
         show_menu()
@@ -101,9 +134,9 @@ def main():
                 continue
 
             if choice == 1:
-                play_quiz(DEFAULT_QUIZZES)
+                play_quiz(quizzes)
             elif choice == 2:
-                print("(퀴즈 추가 기능은 다음 단계에서 구현 예정)")
+                add_quiz(quizzes)
             elif choice == 3:
                 print("(퀴즈 목록 기능은 다음 단계에서 구현 예정)")
             elif choice == 4:
