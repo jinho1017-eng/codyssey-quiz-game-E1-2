@@ -131,10 +131,19 @@ def list_quizzes(quizzes):
         print(f"[{index}] {quiz.question}")
     print("-" * 40)
 
+def check_score(best_score):
+    """최고 점수를 출력한다."""
+    if best_score is None:
+        print("\n아직 퀴즈를 풀지 않으셨습니다. 먼저 퀴즈를 풀어보세요.")
+        return
+
+    print(f"\n🏆 최고 점수: {best_score}점")
+
 
 def main():
     print("프로그램을 시작합니다.")
     quizzes = list(DEFAULT_QUIZZES)
+    best_score = None
 
     while True:
         show_menu()
@@ -146,13 +155,16 @@ def main():
                 continue
 
             if choice == 1:
-                play_quiz(quizzes)
+                score = play_quiz(quizzes)
+                if score is not None and (best_score is None or score > best_score):
+                    best_score = score
+                    print("🎉 새로운 최고 점수입니다!")
             elif choice == 2:
                 add_quiz(quizzes)
             elif choice == 3:
                 list_quizzes(quizzes)
             elif choice == 4:
-                print("(점수 확인 기능은 다음 단계에서 구현 예정)")
+                check_score(best_score)
             elif choice == 5:
                 print("프로그램을 종료합니다. 안녕히 가세요!")
                 break
