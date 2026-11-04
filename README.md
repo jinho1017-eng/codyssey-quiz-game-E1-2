@@ -140,3 +140,5 @@ Python 3.10 이상이 설치되어 있어야 한다. 외부 라이브러리는 �
 ### 퀴즈 삭제
 
 ![퀴즈 삭제](docs/screenshots/delete_quiz.png)
+
+Git 실습 확인: 복제 폴더에서 README를 수정했습니다.
