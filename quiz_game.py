@@ -55,11 +55,12 @@ class QuizGame:
         print("2. 퀴즈 추가")
         print("3. 퀴즈 목록")
         print("4. 점수 확인")
-        print("5. 종료")
+        print("5. 퀴즈 삭제")
+        print("6. 종료")
         print("=" * 40)
 
     def get_menu_choice(self):
-        """메뉴 번호(1~5)를 입력받아 반환한다. 형식이 잘못됐으면 None을 반환한다."""
+        """메뉴 번호(1~6)를 입력받아 반환한다. 형식이 잘못됐으면 None을 반환한다."""
         raw = input("선택: ")
         value = raw.strip()
 
@@ -72,8 +73,8 @@ class QuizGame:
             return None
 
         choice = int(value)
-        if choice < 1 or choice > 5:
-            print("⚠️ 잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+        if choice < 1 or choice > 6:
+            print("⚠️ 잘못된 입력입니다. 1-6 사이의 숫자를 입력하세요.")
             return None
 
         return choice
@@ -128,6 +129,7 @@ class QuizGame:
                 continue
 
             return count
+
     def get_answer_or_hint(self):
         """정답 번호(1~4)를 입력받는다. 'h'를 입력하면 'HINT' 문자열을 반환한다."""
         raw = input("정답 입력 (힌트를 보려면 h 입력): ")
@@ -150,6 +152,7 @@ class QuizGame:
             return None
 
         return choice
+
     def play_quiz(self):
         """퀴즈를 랜덤 순서로 출제하고 점수를 계산해 반환한다."""
         if not self.quizzes:
@@ -218,7 +221,10 @@ class QuizGame:
         while answer is None:
             answer = self.get_answer_choice()
 
-        new_quiz = Quiz(question, choices, answer)
+        hint_raw = input("힌트를 입력하세요 (선택사항, 없으면 그냥 Enter): ")
+        hint = hint_raw.strip() if hint_raw.strip() else None
+
+        new_quiz = Quiz(question, choices, answer, hint=hint)
         self.quizzes.append(new_quiz)
         self.save_state()
         print("\n✅ 퀴즈가 추가되었습니다!")
@@ -234,6 +240,33 @@ class QuizGame:
         for index, quiz in enumerate(self.quizzes, start=1):
             print(f"[{index}] {quiz.question}")
         print("-" * 40)
+
+    def delete_quiz(self):
+        """등록된 퀴즈를 번호로 선택해 삭제하고 파일에 저장한다."""
+        if not self.quizzes:
+            print("\n등록된 퀴즈가 없습니다.")
+            return
+
+        self.list_quizzes()
+        raw = input("삭제할 퀴즈 번호를 입력하세요: ")
+        value = raw.strip()
+
+        if value == "":
+            print("⚠️ 아무것도 입력하지 않으셨습니다. 다시 입력해주세요.")
+            return
+
+        if not value.isdigit():
+            print("⚠️ 잘못된 입력입니다. 숫자를 입력하세요.")
+            return
+
+        index = int(value)
+        if index < 1 or index > len(self.quizzes):
+            print(f"⚠️ 잘못된 입력입니다. 1-{len(self.quizzes)} 사이의 숫자를 입력하세요.")
+            return
+
+        removed = self.quizzes.pop(index - 1)
+        self.save_state()
+        print(f"\n🗑️ 삭제되었습니다: {removed.question}")
 
     def check_score(self):
         """최고 점수를 출력한다."""
@@ -269,6 +302,8 @@ class QuizGame:
                 elif choice == 4:
                     self.check_score()
                 elif choice == 5:
+                    self.delete_quiz()
+                elif choice == 6:
                     print("프로그램을 종료합니다. 안녕히 가세요!")
                     break
             except (KeyboardInterrupt, EOFError):
