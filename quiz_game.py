@@ -1,6 +1,7 @@
 """QuizGame 클래스 - 게임 전체를 관리한다."""
 import random
 import json
+import shutil
 from datetime import datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -9,6 +10,7 @@ from quiz import Quiz
 from default_quizzes import DEFAULT_QUIZZES
 
 STATE_FILE = Path(__file__).with_name("state.json")
+BACKUP_FILE = STATE_FILE.with_name(STATE_FILE.name + ".bak")
 
 
 class QuizGame:
@@ -19,33 +21,30 @@ class QuizGame:
         self.load_state()
 
     def load_state(self):
-        """state.json에서 퀴즈 데이터, 최고 점수, 게임 기록을 불러온다.
-        파일이 없거나, JSON 문법이 깨졌거나, 구조/자료형이 올바르지 않으면
-        기본 퀴즈 데이터·초기 점수·빈 기록으로 복구한다."""
-        if not STATE_FILE.exists():
-            self.quizzes = list(DEFAULT_QUIZZES)
-            self.best_score = None
-            self.history = []
-            return
+        """state.json을 읽는다. 손상되었으면 state.json.bak을 시도하고,
+        그것도 안 되면 기본 퀴즈 데이터·초기 점수·빈 기록으로 시작한다."""
+        if STATE_FILE.exists():
+            try:
+                self.quizzes, self.best_score, self.history = self._load_from(STATE_FILE)
+                score_text = self.best_score if self.best_score is not None else "없음"
+                print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})")
+                return
+            except (json.JSONDecodeError, OSError, ValueError) as error:
+                print(f"⚠️ 저장된 데이터 파일이 손상되었습니다 ({error}).")
 
-        try:
-            with open(STATE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            quizzes, best_score, history = self._parse_state(data)
-        except (json.JSONDecodeError, OSError, ValueError) as error:
-            print(f"⚠️ 저장된 데이터 파일이 손상되었습니다 ({error}). 기본 퀴즈 데이터로 복구합니다.")
-            self.quizzes = list(DEFAULT_QUIZZES)
-            self.best_score = None
-            self.history = []
-            return
+        if BACKUP_FILE.exists():
+            try:
+                self.quizzes, self.best_score, self.history = self._load_from(BACKUP_FILE)
+                print(f"♻️ 백업 파일({BACKUP_FILE.name})에서 복구했습니다. (퀴즈 {len(self.quizzes)}개)")
+                return
+            except (json.JSONDecodeError, OSError, ValueError) as error:
+                print(f"⚠️ 백업 파일도 손상되었습니다 ({error}).")
 
-        # 검증이 모두 끝난 뒤에만 실제 상태에 반영한다 (일부만 불러온 상태 방지).
-        self.quizzes = quizzes
-        self.best_score = best_score
-        self.history = history
-        score_text = self.best_score if self.best_score is not None else "없음"
-        print(f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})")
-
+        print("기본 퀴즈 데이터로 시작합니다.")
+        self.quizzes = list(DEFAULT_QUIZZES)
+        self.best_score = None
+        self.history = []
+        
     @staticmethod
     def _parse_state(data):
         """불러온 JSON 데이터의 구조와 값을 검증해 (quizzes, best_score, history)를 반환한다.
@@ -120,6 +119,7 @@ class QuizGame:
             or question_count < 1
         ):
             raise ValueError("게임 기록의 'question_count'가 올바르지 않습니다")
+        
 
         score = entry.get("score")
         if not isinstance(score, int) or isinstance(score, bool) or not (0 <= score <= 100):
@@ -127,8 +127,16 @@ class QuizGame:
 
         return {"datetime": datetime_value, "question_count": question_count, "score": score}
 
+    @staticmethod
+    def _load_from(path):
+        """path의 JSON을 읽고 검증해 (quizzes, best_score, history)를 반환한다."""
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return QuizGame._parse_state(data)
+    
     def save_state(self):
-        """현재 데이터를 저장하고 성공 여부를 반환한다."""
+        """현재 데이터를 저장하고 성공 여부를 반환한다.
+        저장 전 기존 state.json이 있으면 state.json.bak으로 백업한다."""
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
@@ -137,6 +145,9 @@ class QuizGame:
         temp_path = None
 
         try:
+            if STATE_FILE.exists():
+                shutil.copyfile(STATE_FILE, BACKUP_FILE)
+
             with NamedTemporaryFile(
                 mode="w",
                 encoding="utf-8",
