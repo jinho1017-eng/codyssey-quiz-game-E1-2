@@ -3,6 +3,7 @@ import random
 import json
 from datetime import datetime
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from quiz import Quiz
 from default_quizzes import DEFAULT_QUIZZES
@@ -127,17 +128,37 @@ class QuizGame:
         return {"datetime": datetime_value, "question_count": question_count, "score": score}
 
     def save_state(self):
-        """현재 퀴즈 데이터, 최고 점수, 게임 기록을 state.json에 저장한다."""
+        """현재 데이터를 저장하고 성공 여부를 반환한다."""
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
             "history": self.history,
         }
+        temp_path = None
+
         try:
-            with open(STATE_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
+            with NamedTemporaryFile(
+                mode="w",
+                encoding="utf-8",
+                dir=STATE_FILE.parent,
+                suffix=".tmp",
+                delete=False,
+            ) as file:
+                temp_path = Path(file.name)
+                json.dump(data, file, ensure_ascii=False, indent=2)
+
+            temp_path.replace(STATE_FILE)
+            return True
         except OSError as error:
             print(f"⚠️ 데이터 저장에 실패했습니다: {error}")
+            return False
+        finally:
+            if temp_path is not None:
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+
 
     def show_menu(self):
         print("=" * 40)
@@ -289,7 +310,7 @@ class QuizGame:
             else:
                 print(f"❌ 오답입니다. 정답은 {quiz.answer}번입니다.")
 
-        raw_score = int(correct_count / count * 100)
+        raw_score = correct_count * 100 // count
         score = max(0, raw_score - hint_used_count * 5)
         print("=" * 40)
         print(f"🏆 결과: {count}문제 중 {correct_count}문제 정답! ({score}점)")
@@ -318,8 +339,10 @@ class QuizGame:
 
         new_quiz = Quiz(question, choices, answer, hint=hint)
         self.quizzes.append(new_quiz)
-        self.save_state()
-        print("\n✅ 퀴즈가 추가되었습니다!")
+        if self.save_state():
+            print("\n✅ 퀴즈를 추가하고 저장했습니다.")
+        else:
+            print("\n⚠️ 퀴즈는 현재 실행 중인 목록에만 추가됐습니다.")
 
     def list_quizzes(self):
         """등록된 퀴즈 목록을 출력한다."""
@@ -362,8 +385,10 @@ class QuizGame:
             index = candidate
 
         removed = self.quizzes.pop(index - 1)
-        self.save_state()
-        print(f"\n🗑️ 삭제되었습니다: {removed.question}")
+        if self.save_state():
+            print(f"\n🗑️ 퀴즈를 삭제하고 저장했습니다: {removed.question}")
+        else:
+            print(f"\n⚠️ 퀴즈는 현재 실행 중인 목록에서만 삭제됐습니다: {removed.question}")
 
     def check_score(self):
         """최고 점수와 최근 게임 기록을 출력한다."""
