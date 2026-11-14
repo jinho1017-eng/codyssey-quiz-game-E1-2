@@ -21,6 +21,7 @@
   - [최초 clone 기록 확인](#최초-clone-기록-확인)
   - [복제 폴더의 commit과 push](#복제-폴더의-commit과-push)
   - [원래 폴더의 pull과 반영 확인](#원래-폴더의-pull과-반영-확인)
+  - [커밋 기록 (총 32개)](#커밋-기록-총-32개)
 - [8. 실행 화면](#8-실행-화면)
   - [개발 환경](#개발-환경)
   - [커밋 히스토리](#커밋-히스토리)
@@ -29,6 +30,9 @@
   - [퀴즈 풀기 (힌트 사용 포함)](#퀴즈-풀기-힌트-사용-포함)
   - [점수 확인과 게임 기록](#점수-확인과-게임-기록)
   - [퀴즈 삭제](#퀴즈-삭제)
+- [9. 트러블슈팅](#9-트러블슈팅)
+- [10. 클래스를 사용한 이유와 재사용성](#10-클래스를-사용한-이유와-재사용성)
+- [11. 유지보수 가이드 (요구 변경 시 수정 위치)](#11-유지보수-가이드-요구-변경-시-수정-위치)
 
 ## 1. 프로젝트 개요
 
@@ -45,7 +49,7 @@
 | 초기 Git 설정과 첫 push    | `.gitignore`와 `README.md`를 첫 커밋에 담아 업로드         | [초기 설정 기록](#초기-git-설정과-첫-업로드)      |
 | 브랜치 생성과 병합         | `feature/play-quiz`에서 퀴즈 풀기를 구현하고 `main`에 병합 | [브랜치 작업 기록](#퀴즈-풀기-기능의-브랜치-작업) |
 | 필수 Git 명령 7종          | 각 명령을 사용한 작업과 확인 자료를 정리                       | [Git 명령 사용 기록](#필수-git-명령-사용-기록)    |
-| 의미 있는 커밋 10개 이상   | 기능 구현, 오류 수정, 문서 변경 등을 작업 단위로 기록          | [커밋 히스토리](#커밋-히스토리)                   |
+| 의미 있는 커밋 10개 이상   | 총 32개 커밋을 기능 구현, 오류 수정, 문서 변경 단위로 기록     | [커밋 기록](#커밋-기록-총-32개)                   |
 | 복제 폴더와 원래 폴더 연동 | 복제 폴더에서 push한 변경을 원래 폴더에서 pull로 확인          | [복제 실습 기록](#복제-폴더를-이용한-변경-반영)   |
 | 보너스 기능                | 랜덤 출제·문제 수 선택·힌트·삭제·기록 조회 구현            | [보너스 기능](#4-1-보너스-기능)                   |
 
@@ -181,9 +185,17 @@ Python 3.10 이상이 필요하다. 추가 패키지는 설치할 필요가 없�
 
 ### 초기 Git 설정과 첫 업로드
 
-`git init`으로 로컬 저장소를 만들고 `.gitignore`와 `README.md`를 작성했다. 두 파일을 `git add`로 등록한 뒤 `git commit`으로 첫 커밋 `2dd03f7`을 만들고, `git push`로 GitHub에 올렸다.
+```bash
+git init
+git remote add origin https://github.com/jinho1017-eng/codyssey-quiz-game-E1-2.git
+git branch -M main
+git remote -v
+git add .gitignore README.md
+git commit -m "Init: 프로젝트 초기 설정 (.gitignore, README)"
+git push -u origin main
+```
 
-첫 커밋에서 두 파일이 추가된 것을 확인했다.
+`git init`으로 로컬 저장소를 만들고 `.gitignore`와 `README.md`를 작성했다. 두 파일을 `git add`로 등록한 뒤 `git commit`으로 첫 커밋 `2dd03f7`을 만들고, 원격 저장소를 연결한 뒤 `git push`로 GitHub에 올렸다.
 
 ```text
 2dd03f7 Init: 프로젝트 초기 설정 (.gitignore, README)
@@ -193,7 +205,21 @@ A       README.md
 
 ### 퀴즈 풀기 기능의 브랜치 작업
 
-`feature/play-quiz` 브랜치를 생성해 퀴즈 풀기 기능을 구현하고 커밋 `ae640e0`에 기록했다. 이후 `git checkout`으로 `main`에 돌아와 `git merge`로 기능을 합쳤다.
+```bash
+git checkout -b feature/play-quiz
+
+# quiz_game.py에 퀴즈 풀기 기능 구현
+
+git add main.py
+git commit -m "Feat: 퀴즈 풀기 기능 구현"
+git push -u origin feature/play-quiz
+
+git checkout main
+git merge feature/play-quiz
+git push
+```
+
+`git checkout -b`로 `feature/play-quiz` 브랜치를 생성과 동시에 이동해 퀴즈 풀기 기능을 구현하고 커밋 `ae640e0`에 기록했다. 작업 중인 브랜치도 `git push -u origin feature/play-quiz`로 GitHub에 올려두었다. 이후 `git checkout`으로 `main`에 돌아와 `git merge`로 기능을 합쳤다.
 
 브랜치와 HEAD의 Git reflog에서 관련 기록을 발췌했다.
 
@@ -213,7 +239,7 @@ ae640e0 merge feature/play-quiz: Fast-forward
 | ---------------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
 | `git init`     | 원래 폴더에 로컬 저장소 생성                                  | [초기 설정과 첫 커밋](#초기-git-설정과-첫-업로드)             |
 | `git add`      | 초기 파일과 작업 중 변경 파일을 커밋 대상으로 등록            | [초기 파일 추가 기록](#초기-git-설정과-첫-업로드)             |
-| `git commit`   | 초기 설정, 기능 구현, 오류 수정, 문서 변경을 작업 단위로 기록 | [커밋 히스토리](#커밋-히스토리)                               |
+| `git commit`   | 초기 설정, 기능 구현, 오류 수정, 문서 변경을 작업 단위로 기록 | [커밋 기록](#커밋-기록-총-32개)                               |
 | `git push`     | 복제 폴더의 커밋 `452aad3`을 GitHub에 업로드                | [복제 폴더의 commit과 push](#복제-폴더의-commit과-push)       |
 | `git pull`     | 원래 폴더에서 `452aad3`을 가져와 README 변경 확인           | [원래 폴더의 pull과 반영 확인](#원래-폴더의-pull과-반영-확인) |
 | `git checkout` | `main`과 `feature/play-quiz` 사이를 전환                  | [브랜치 전환 기록](#퀴즈-풀기-기능의-브랜치-작업)             |
@@ -221,13 +247,27 @@ ae640e0 merge feature/play-quiz: Fast-forward
 
 ### 복제 폴더를 이용한 변경 반영
 
-기존에 clone해둔 별도 폴더에서 변경을 올리고, 원래 폴더에서 같은 변경을 가져오는 실습을 진행했다.
+```bash
+git clone https://github.com/jinho1017-eng/codyssey-quiz-game-E1-2.git quiz-game-E1-2-clone-test
+cd quiz-game-E1-2-clone-test
+git pull --ff-only origin main
 
-1. 복제 폴더 `D:\codyssey\quiz-game-E1-2-clone-test`를 `git pull --ff-only origin main`으로 최신 상태로 갱신했다.
-2. 복제 폴더의 README에 실습용 문구를 추가했다.
-3. `Docs: 복제 폴더에서 Git 실습 기록 추가` 메시지로 커밋 `452aad3`을 만들고 GitHub에 push했다.
-4. 원래 폴더 `D:\codyssey\quiz-game-E1-2`에서 `git pull --ff-only origin main`을 실행했다.
-5. 원래 폴더의 README에 실습 문구가 표시되고, `git log -1 --oneline`에서 같은 커밋 `452aad3`이 보이는 것을 확인했다.
+Add-Content -LiteralPath .\README.md -Encoding utf8 -Value "`nGit 실습 확인: 복제 폴더에서 README를 수정했습니다."
+
+git diff -- README.md
+git add README.md
+git commit -m "Docs: 복제 폴더에서 Git 실습 기록 추가"
+git push origin main
+```
+
+원래 폴더에서:
+
+```bash
+git pull --ff-only origin main
+git log -1 --oneline
+```
+
+기존에 clone해둔 별도 폴더를 `git pull --ff-only`로 최신 상태로 갱신한 뒤, `Add-Content` 명령으로 README에 실습용 문구를 추가했다. 변경 내용을 `git diff`로 확인하고 커밋 `452aad3`을 만들어 push했다. 원래 폴더에서 `git pull --ff-only origin main`을 실행한 뒤 `git log -1 --oneline`으로 같은 커밋 `452aad3`이 반영된 것을 확인했다.
 
 반영을 확인한 뒤 실습용 문구는 커밋 `4fc87f1`에서 삭제했다. 실습 당시 결과는 아래 캡처에서 볼 수 있다.
 
@@ -251,6 +291,51 @@ git reflog --date=iso | Select-String "clone:"
 
 ![원래 폴더 pull 및 반영 확인](docs/screenshots/clone_pull.png)
 
+### 커밋 기록 (총 32개)
+
+```bash
+git rev-list --count HEAD
+git --no-pager log --reverse --format='| %h | %s |'
+```
+
+| 해시    | 커밋 메시지                                                                     |
+| ------- | ------------------------------------------------------------------------------- |
+| 2dd03f7 | Init: 프로젝트 초기 설정 (.gitignore, README)                                   |
+| 1d43809 | Feat: 메뉴 출력 및 입력 검증 기능 구현                                          |
+| 3608655 | Feat: Quiz 클래스 구현                                                          |
+| 8254914 | Feat: Python 상식 기본 퀴즈 6개 데이터 작성                                     |
+| ae640e0 | Feat: 퀴즈 풀기 기능 구현                                                       |
+| b5b2794 | Feat: 퀴즈 추가 기능 구현                                                       |
+| d0d4668 | Feat: 퀴즈 목록 기능 구현                                                       |
+| ba0fbef | Feat: 점수 확인 및 최고 점수 갱신 기능 구현                                     |
+| 99dd61d | Refactor: QuizGame 클래스로 구조 정리                                           |
+| 0cd3535 | Feat: state.json 파일 저장/불러오기 기능 구현                                   |
+| 755074c | Docs: README 작성                                                               |
+| 4273624 | Docs: clone/pull 실습용 문구 추가                                               |
+| 1b6f503 | Docs: 실행 화면 스크린샷 추가                                                   |
+| f5f6132 | Feat(bonus): 퀴즈 출제 순서 랜덤화                                              |
+| 428061d | Feat(bonus): 풀 문제 수 선택 가능                                               |
+| 2902109 | Feat(bonus): 힌트 기능 + 힌트 저장 버그 수정                                    |
+| e68f922 | Feat(bonus): 퀴즈 삭제 기능 + 퀴즈 추가 시 힌트 입력 기능                       |
+| ec68323 | Feat(bonus): 점수 기록 히스토리 저장/조회 기능                                  |
+| 2d9fb0a | Docs: 보너스 기능 설명 추가                                                     |
+| 1b07c4d | Docs: 보너스 기능 반영한 최신 실행화면 스크린샷으로 교체                        |
+| 2087190 | Fix: state.json 구조/자료형 검증 강화, README 정확성 보완 및 Git 실습 증거 정리 |
+| 99d3467 | Fix: 숫자 입력 예외 처리 및 README 보완                                         |
+| 452aad3 | Docs: 복제 폴더에서 Git 실습 기록 추가                                          |
+| 4fc87f1 | Docs: README 실습용 문구 삭제                                                   |
+| 7364334 | Docs: Git 복제 및 pull 실습 증거 추가                                           |
+| db28efe | Docs: 최초 clone 기록과 증거 이미지 추가                                        |
+| d3a40ec | Docs: clone 증거 이미지 중복 표시 수정                                          |
+| ef1b1fd | Docs: 요구사항 확인표, 브랜치/Git 명령 증거 보완                                |
+| 4b3e30d | Docs: 목차 추가 및 증거 링크를 README 내부 앵커로 변경                          |
+| 62c5ddd | Fix: 점수 계산 오차와 저장 실패 안내 수정                                       |
+| bfa6004 | Docs: 첫 퀴즈 플레이 안내 추가                                                  |
+| a20ca40 | Docs: 점수 계산 오류 수정 및 검증 사례 추가                                     |
+| f8de450 | Feat: state.json 백업/복구 기능 추가, 1000개 데이터 성능 분석 문서화            |
+
+`Feat`(기능 추가), `Fix`(버그 수정), `Refactor`(구조 개선), `Docs`(문서)로 커밋을 구분했다. `Feat(bonus)`는 보너스 기능 구현에 사용했다.
+
 ## 8. 실행 화면
 
 ### 개발 환경
@@ -259,7 +344,7 @@ git reflog --date=iso | Select-String "clone:"
 
 ### 커밋 히스토리
 
-`git log --oneline --graph` 결과다. 변경을 작업 단위로 나눠 10개 이상 커밋했다. 커밋 메시지에서 `Feat`는 기능 추가, `Fix`는 오류 수정, `Docs`는 문서 변경, `Refactor`는 코드 구조 정리에 사용했다. 보너스 기능 추가에는 `Feat(bonus)`를 사용했다.
+`git log --oneline --graph` 결과다. 변경을 작업 단위로 나눠 32개 커밋했다. 커밋 메시지에서 `Feat`는 기능 추가, `Fix`는 오류 수정, `Docs`는 문서 변경, `Refactor`는 코드 구조 정리에 사용했다. 보너스 기능 추가에는 `Feat(bonus)`를 사용했다.
 
 ![git log](docs/screenshots/git_log.png)
 
@@ -282,3 +367,58 @@ git reflog --date=iso | Select-String "clone:"
 ### 퀴즈 삭제
 
 ![퀴즈 삭제](docs/screenshots/delete_quiz.png)
+
+## 9. 트러블슈팅
+
+### 커밋 메시지 오타 수정 (`--amend` + `--force`)
+
+- **문제**: `Fix: 점수 계산 오차와 저장 실패 안내 수정` 커밋을 만들고 `git push`까지 끝낸 뒤, 커밋 메시지에 오타가 있었던 것을 발견했다.
+- **원인**: 이미 GitHub에 올라간 커밋이라, 단순히 다시 커밋만 해서는 오타가 그대로 역사에 남는 상황이었다.
+- **확인/해결**: 새 커밋을 추가하는 대신 `git commit --amend`로 직전 커밋 자체를 수정했다. 이미 push된 커밋을 수정하면 해시값이 바뀌어 일반 `git push`로는 거부되므로, `git push --force`로 원격 기록을 덮어썼다. 혼자 작업하는 브랜치에서 방금 올린 커밋만 수정한 것이라 안전하게 적용할 수 있었다.
+
+```bash
+git commit --amend -m "Fix: 점수 계산 오차와 저장 실패 안내 수정"
+git push --force
+```
+
+## 10. 클래스를 사용한 이유와 재사용성
+
+### 역할 분리
+
+| 클래스       | 책임                                                                    | 모르는 것                          |
+| ------------ | ----------------------------------------------------------------------- | ---------------------------------- |
+| `Quiz`     | 퀴즈 1개의 데이터(문제, 선택지, 정답, 힌트), 출력, 정답 판정, dict 변환 | 메뉴, 파일 저장 위치, 점수         |
+| `QuizGame` | 메뉴 흐름, 퀴즈 출제, 점수 계산, 저장/불러오기, 백업                    | `Quiz` 내부의 구체적인 출력 방식 |
+
+`Quiz` 클래스는 `input()`이나 파일 경로를 전혀 쓰지 않는다. 데이터(문제, 선택지, 정답, 힌트)를 보관하고, 정답을 판정하고, dict로 변환/복원하는 역할만 한다. 그래서 다른 프로그램에서도 그대로 가져다 쓸 수 있다.
+
+### 재사용 시나리오
+
+| 시나리오                        | 재사용하는 부분                                             | 새로 만들 부분                                             |
+| ------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
+| 웹(Flask 등) 퀴즈 페이지로 확장 | `Quiz`의 `is_correct()`, `to_dict()`, `from_dict()` | 화면(HTML)과 라우팅만                                      |
+| 다른 주제(영어 단어, 역사) 퀴즈 | `Quiz`, `QuizGame` 전체                                 | `default_quizzes.py`의 기본 문제만 교체                  |
+| 성능 측정                       | `Quiz`, `to_dict()`/`from_dict()`                     | `benchmark.py`처럼 import해서 바로 사용 (실제 사용 사례) |
+| 퀴즈 데이터 내보내기/가져오기   | `to_dict()`/`from_dict()` (검증 포함)                   | 파일 선택 UI만                                             |
+
+`Quiz.from_dict()`에 검증 로직을 한 곳에 모아뒀기 때문에, 퀴즈 형식이 바뀌어도 이 한 곳만 고치면 불러오기·추가·성능측정 스크립트 전부에 일관되게 적용된다.
+
+## 11. 유지보수 가이드 (요구 변경 시 수정 위치)
+
+| 요구 변경                            | 수정할 곳                                                                 | 함께 확인할 곳                                                         |
+| ------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 점수 계산 방식 변경                  | `QuizGame.play_quiz()`의 점수 계산 부분 (`raw_score = ...`)           | `_parse_state()`의 `best_score` 범위 검사(0~100)                   |
+| 선택지 개수 변경 (4개 → 5개)        | `_parse_quiz_item()`의 `len(choices) != 4`                            | `add_quiz()`의 `range(1, 5)`, `get_answer_choice()`의 범위(1~4)  |
+| 힌트 감점 점수 변경 (5점 → 다른 값) | `play_quiz()`의 `hint_used_count * 5`                                 | 없음 (한 곳에서만 사용)                                                |
+| 퀴즈 필드 추가 (예: 카테고리)        | `Quiz.__init__`, `to_dict()`, `from_dict()`                         | `default_quizzes.py` 기본 문제, `add_quiz()` 입력, `show()` 출력 |
+| 저장 파일 위치/이름 변경             | `quiz_game.py` 상단의 `STATE_FILE`, `BACKUP_FILE`                   | `.gitignore`                                                         |
+| 저장 형식 변경 (JSON → 다른 형식)   | `save_state()`, `load_state()`, `_load_from()`                      | 나머지 메서드는 `self.quizzes`만 쓰므로 수정 불필요                  |
+| 메뉴 항목 추가                       | `show_menu()` 출력, `run()`의 분기, `get_menu_choice()`의 범위(1~6) | 데이터가 바뀌는 기능이면 `save_state()` 호출 추가                    |
+| 기본 퀴즈 문제 변경                  | `default_quizzes.py`의 `DEFAULT_QUIZZES`                              | 없음                                                                   |
+
+### 변경 후 확인할 것
+
+1. `python main.py`로 메뉴 1~6번 전부 실행해보기
+2. 종료 후 다시 실행해서 데이터가 그대로 유지되는지 확인
+3. `state.json`을 일부러 깨뜨려보고(`echo "broken" > state.json`) 백업 복구가 되는지 확인
+4. 저장 형식을 바꿨다면 `python benchmark.py`로 성능 재측정
